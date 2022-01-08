@@ -42,9 +42,13 @@ namespace EcsCollision
                 {
                     if (i == j) continue;
 
-                    if (ObbVsObb(
-                        _boxFilter.Get1(i), _boxFilter.GetEntity(i).Get<PositionComponent>().value,
-                        _boxFilter.Get1(j), _boxFilter.GetEntity(j).Get<PositionComponent>().value))
+                    var iPosition = _boxFilter.GetEntity(i).Get<PositionComponent>().value;
+                    var jPosition = _boxFilter.GetEntity(j).Get<PositionComponent>().value;
+                    var iRotation = _boxFilter.GetEntity(i).Get<RotationComponent>().value;
+                    var jRotation = _boxFilter.GetEntity(j).Get<RotationComponent>().value;
+                    
+                    if (ObbVsObb(_boxFilter.Get1(i), iPosition, iRotation,
+                                 _boxFilter.Get1(j), jPosition, jRotation))
                     {
                         var collisionEvent = _world.NewEntity().Get<EcsCollisionEvent<BoxColliderComponent>>();
                         collisionEvent.a = _boxFilter.Get1(i);
@@ -81,11 +85,11 @@ namespace EcsCollision
             return radiusSum2 > x2 + y2 + z2;
         }
 
-        private bool ObbVsObb(BoxColliderComponent a, Vector3 aPoseOffset, BoxColliderComponent b, Vector3 bPoseOffset)
+        private bool ObbVsObb(BoxColliderComponent a, Vector3 aPoseOffset, Quaternion aRotation, 
+            BoxColliderComponent b, Vector3 bPoseOffset, Quaternion bRotation)
         {
-            var r = new Quaternion();
-            var obb1 = new OBB(a.position + aPoseOffset, r, a.size);
-            var obb2 = new OBB(b.position + bPoseOffset, r, b.size);
+            var obb1 = new OBB(a.position + aPoseOffset, aRotation, a.size);
+            var obb2 = new OBB(b.position + bPoseOffset, bRotation, b.size);
 
             if (OBBIntersectionTester.PreTest(obb1, obb2))
             {

@@ -4,6 +4,6 @@ namespace EcsCollision
 {
     public class RotationComponentProvider : MonoProvider<RotationComponent>
     {
-
+        
     }
 }

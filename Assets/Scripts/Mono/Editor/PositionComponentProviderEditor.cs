@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
 namespace EcsCollision
 {
@@ -7,6 +8,17 @@ namespace EcsCollision
     public class PositionComponentProviderEditor : UnityEditor.Editor
     {
         private PositionComponentProvider[] current;
+
+        public override void OnInspectorGUI()
+        {
+            for (var i = 0; i < current.Length; i++)
+            {
+                GUI.enabled = false;
+                EditorGUILayout.Space();
+                EditorGUILayout.Vector3Field("Value ", current[i].value.value);
+                GUI.enabled = true;
+            }
+        }
 
         private void OnEnable()
         {
@@ -23,7 +35,7 @@ namespace EcsCollision
             for (var i = 0; i < current.Length; i++)
             {
                 var temp = current[i];
-                temp.transform.position = temp.value.value;
+                temp.value.value = temp.transform.position;
             }
         }
     }

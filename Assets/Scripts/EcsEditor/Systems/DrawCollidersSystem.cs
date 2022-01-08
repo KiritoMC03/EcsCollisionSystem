@@ -13,22 +13,26 @@ namespace EcsCollision.Editor
         {
             for (var i = 0; i < _sphereColliderFilter.GetEntitiesCount(); i++)
             {
-                ref var current = ref _sphereColliderFilter.Get1(i);
-                var offset = _sphereColliderFilter.GetEntity(i).Get<PositionComponent>().value;
-                Gizmos.DrawWireSphere(current.center + offset, current.radius);
+                var currentSphere = _sphereColliderFilter.Get1(i);
+                
+                Gizmos.matrix = CalculateMatrix(_sphereColliderFilter.GetEntity(i));
+                Gizmos.DrawWireSphere(currentSphere.center, currentSphere.radius);
             }
 
             for (var i = 0; i < _boxColliderFilter.GetEntitiesCount(); i++)
             {
-                ref var temp =  ref _boxColliderFilter.Get1(i);
-                var position = temp.position + _boxColliderFilter.GetEntity(i).Get<PositionComponent>().value;
-                var rotation = Quaternion.Euler(_boxColliderFilter.GetEntity(i).Get<RotationComponent>().value);
-
-
-                var rotationMatrix = Matrix4x4.TRS(position, rotation.normalized, Vector3.one);
-                Gizmos.matrix = rotationMatrix;
-                Gizmos.DrawCube(position, temp.size);
+                var currentBox = _boxColliderFilter.Get1(i);
+                 
+                Gizmos.matrix = CalculateMatrix(_boxColliderFilter.GetEntity(i));
+                Gizmos.DrawWireCube(currentBox.position, currentBox.size);
             }
+        }
+
+        private Matrix4x4 CalculateMatrix(EcsEntity entity)
+        {
+            var position = entity.Get<PositionComponent>();
+            var rotation = entity.Get<RotationComponent>();
+            return Matrix4x4.TRS(position.value, rotation.value.normalized, Vector3.one);
         }
     }
 }

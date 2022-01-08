@@ -24,20 +24,13 @@ namespace EcsCollision
             Handles.color = Color.Lerp(Color.white, Color.green, 0.5f);
             for (var i = 0; i < current.Length; i++)
             {
-                var temp = current[i];
-                var position = temp.value.position;
-                if (temp.TryGetComponent(out PositionComponentProvider pose))
-                {
-                    position += pose.value.value;
-                }
+                var currentBox = current[i];
+                var currentTransform = currentBox.transform;
                 
-                if (temp.TryGetComponent(out RotationComponentProvider rotation))
-                {
-                    var rotationMatrix = Matrix4x4.TRS(position, Quaternion.Euler(rotation.value.value).normalized, Vector3.one);
-                    Handles.matrix = rotationMatrix;
-                }
-                
-                Handles.DrawWireCube(position, temp.value.size);
+                var rotationMatrix = Matrix4x4.TRS(currentTransform.localPosition, currentTransform.rotation.normalized, currentTransform.localScale);
+                Handles.matrix = rotationMatrix;
+
+                Handles.DrawWireCube( currentBox.value.position, currentBox.value.size);
             }
         }
     }

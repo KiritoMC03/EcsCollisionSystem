@@ -80,9 +80,6 @@ namespace EcsCollision
 
         public static bool Test(OBB obb1, OBB obb2)
         {
-            //WalkZone z1 = this[n1]; WalkZone z2 = this[n2];
-
-
             var obb1RotationMatrix =
                 Converter.QuaternionToMatrix3x3(obb1.rotation.x, obb1.rotation.y, obb1.rotation.z, obb1.rotation.w);
             var obb2RotationMatrix =
