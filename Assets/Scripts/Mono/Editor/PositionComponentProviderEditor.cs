@@ -4,7 +4,7 @@ namespace EcsCollision
 {
     [CustomEditor(typeof(PositionComponentProvider))]
     [CanEditMultipleObjects]
-    public class EcsPositionProviderEditor : UnityEditor.Editor
+    public class PositionComponentProviderEditor : UnityEditor.Editor
     {
         private PositionComponentProvider[] current;
 

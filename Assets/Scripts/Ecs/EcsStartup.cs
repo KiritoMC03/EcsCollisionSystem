@@ -62,6 +62,7 @@ namespace EcsCollision
         private void AddOneFrames()
         {
             _systems.OneFrame<EcsCollisionEvent<SphereColliderComponent>>();
+            _systems.OneFrame<EcsCollisionEvent<BoxColliderComponent>>();
         }
     }
 }

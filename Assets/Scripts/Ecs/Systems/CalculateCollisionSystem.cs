@@ -6,26 +6,59 @@ namespace EcsCollision
     public sealed class CalculateCollisionSystem : IEcsRunSystem
     {
         private readonly EcsWorld _world = null;
-        private readonly EcsFilter<SphereColliderComponent> _filter = null;
+        private readonly EcsFilter<SphereColliderComponent> _sphereFilter = null;
+        private readonly EcsFilter<BoxColliderComponent> _boxFilter = null;
 
         public void Run()
         {
-            foreach (var i in _filter)
+            var sphereIsOdd = ParseSemiEntities(_sphereFilter.GetEntitiesCount(), out var sphereNumber);
+            var sphereNumber2 = sphereNumber;
+            if (sphereIsOdd) sphereNumber2 = sphereNumber + 1;
+
+            for (var i = 0; i < sphereNumber; i++)
             {
-                foreach (var j in _filter)
+                for (var j = 0; j < sphereNumber2; j++)
                 {
                     if (i == j) continue;
 
                     if (SphereVsSphereOptimized(
-                        _filter.Get1(i), _filter.GetEntity(i).Get<PositionComponent>().value,
-                        _filter.Get1(j), _filter.GetEntity(j).Get<PositionComponent>().value))
+                        _sphereFilter.Get1(i), _sphereFilter.GetEntity(i).Get<PositionComponent>().value,
+                        _sphereFilter.Get1(j), _sphereFilter.GetEntity(j).Get<PositionComponent>().value))
                     {
                         var collisionEvent = _world.NewEntity().Get<EcsCollisionEvent<SphereColliderComponent>>();
-                        collisionEvent.a = _filter.Get1(i);
-                        collisionEvent.b = _filter.Get1(j);
+                        collisionEvent.a = _sphereFilter.Get1(i);
+                        collisionEvent.b = _sphereFilter.Get1(j);
                     }
                 }
             }
+
+            var boxIsOdd = ParseSemiEntities(_boxFilter.GetEntitiesCount(), out var boxNumber);
+            var boxNumber2 = boxNumber * 2;
+            if (!boxIsOdd) boxNumber2++;
+
+            for (var i = 0; i < boxNumber; i++)
+            {
+                for (var j = boxNumber; j < boxNumber2; j++)
+                {
+                    if (i == j) continue;
+
+                    if (ObbVsObb(
+                        _boxFilter.Get1(i), _boxFilter.GetEntity(i).Get<PositionComponent>().value,
+                        _boxFilter.Get1(j), _boxFilter.GetEntity(j).Get<PositionComponent>().value))
+                    {
+                        var collisionEvent = _world.NewEntity().Get<EcsCollisionEvent<BoxColliderComponent>>();
+                        collisionEvent.a = _boxFilter.Get1(i);
+                        collisionEvent.b = _boxFilter.Get1(j);
+                    }
+
+                }
+            }
+        }
+
+        private bool ParseSemiEntities(int number, out int result)
+        {
+            result = number / 2;
+            return number % 2 == 0;
         }
 
         #region Sphere Methods
@@ -48,6 +81,20 @@ namespace EcsCollision
             return radiusSum2 > x2 + y2 + z2;
         }
 
+        private bool ObbVsObb(BoxColliderComponent a, Vector3 aPoseOffset, BoxColliderComponent b, Vector3 bPoseOffset)
+        {
+            var r = new Quaternion();
+            var obb1 = new OBB(a.position + aPoseOffset, r, a.size);
+            var obb2 = new OBB(b.position + bPoseOffset, r, b.size);
+
+            if (OBBIntersectionTester.PreTest(obb1, obb2))
+            {
+                return OBBIntersectionTester.Test(obb1, obb2);
+            }
+
+            return false;
+        }
+        
         #endregion
     }
 }
