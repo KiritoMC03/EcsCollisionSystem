@@ -42,13 +42,9 @@ namespace EcsCollision
                 {
                     if (i == j) continue;
 
-                    var iPosition = _boxFilter.GetEntity(i).Get<PositionComponent>().value;
-                    var jPosition = _boxFilter.GetEntity(j).Get<PositionComponent>().value;
-                    var iRotation = _boxFilter.GetEntity(i).Get<RotationComponent>().value;
-                    var jRotation = _boxFilter.GetEntity(j).Get<RotationComponent>().value;
                     
-                    if (ObbVsObb(_boxFilter.Get1(i), iPosition, iRotation,
-                                 _boxFilter.Get1(j), jPosition, jRotation))
+                    if (ObbVsObb(_boxFilter.Get1(i), _boxFilter.GetEntity(i),
+                                 _boxFilter.Get1(j), _boxFilter.GetEntity(j)))
                     {
                         var collisionEvent = _world.NewEntity().Get<EcsCollisionEvent<BoxColliderComponent>>();
                         collisionEvent.a = _boxFilter.Get1(i);
@@ -85,12 +81,22 @@ namespace EcsCollision
             return radiusSum2 > x2 + y2 + z2;
         }
 
-        private bool ObbVsObb(BoxColliderComponent a, Vector3 aPoseOffset, Quaternion aRotation, 
-            BoxColliderComponent b, Vector3 bPoseOffset, Quaternion bRotation)
+        private bool ObbVsObb(BoxColliderComponent a, EcsEntity aEntity, 
+            BoxColliderComponent b, EcsEntity bEntity)
         {
-            var obb1 = new OBB(a.position + aPoseOffset, aRotation, a.size);
-            var obb2 = new OBB(b.position + bPoseOffset, bRotation, b.size);
+            var aPosition = aEntity.Get<PositionComponent>().value;
+            var bPosition = bEntity.Get<PositionComponent>().value;
+            var aRotation = aEntity.Get<RotationComponent>().value;
+            var bRotation = bEntity.Get<RotationComponent>().value;
+            var aScale = aEntity.Get<LossyScaleComponent>().value;
+            var bScale = bEntity.Get<LossyScaleComponent>().value;
+            aScale = new Vector3(aScale.x * a.size.x, aScale.y * a.size.y, aScale.z * a.size.z);
+            bScale = new Vector3(bScale.x * a.size.x, bScale.y * a.size.y, bScale.z * a.size.z);
+            
+            var obb1 = new OBB(a.position + aPosition, aRotation, aScale);
+            var obb2 = new OBB(b.position + bPosition, bRotation, bScale);
 
+            
             if (OBBIntersectionTester.PreTest(obb1, obb2))
             {
                 return OBBIntersectionTester.Test(obb1, obb2);

@@ -24,6 +24,7 @@ namespace EcsCollision.Editor
                 var currentBox = _boxColliderFilter.Get1(i);
                  
                 Gizmos.matrix = CalculateMatrix(_boxColliderFilter.GetEntity(i));
+                
                 Gizmos.DrawWireCube(currentBox.position, currentBox.size);
             }
         }
@@ -32,7 +33,8 @@ namespace EcsCollision.Editor
         {
             var position = entity.Get<PositionComponent>();
             var rotation = entity.Get<RotationComponent>();
-            return Matrix4x4.TRS(position.value, rotation.value.normalized, Vector3.one);
+            var scale = entity.Get<LossyScaleComponent>();
+            return Matrix4x4.TRS(position.value, rotation.value.normalized, scale.value);
         }
     }
 }
